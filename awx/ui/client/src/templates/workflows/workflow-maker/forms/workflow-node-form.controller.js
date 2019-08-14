@@ -209,12 +209,12 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 let jobTemplate = templateType === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
 
                 if (_.get($scope, 'nodeConfig.node.promptData') && !_.isEmpty($scope.nodeConfig.node.promptData)) {
-                    $scope.promptData = _.cloneDeep($scope.nodeConfig.node.promptData);
-                    const launchConf = $scope.promptData.launchConf;
+                    $scope.jobNodeState.promptData = _.cloneDeep($scope.nodeConfig.node.promptData);
+                    const launchConf = $scope.jobNodeState.promptData.launchConf;
 
                     if (!shouldShowPromptButton(launchConf)) {
-                            $scope.showPromptButton = false;
-                            $scope.promptModalMissingReqFields = false;
+                            $scope.jobNodeState.showPromptButton = false;
+                            $scope.jobNodeState.promptModalMissingReqFields = false;
                     } else {
                         $scope.showPromptButton = true;
 
@@ -306,11 +306,11 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                 }
                             });
 
-                            $scope.credentialRequiresPassword = credentialRequiresPassword;
+                            $scope.jobNodeState.credentialRequiresPassword = credentialRequiresPassword;
 
                             if (!shouldShowPromptButton(launchConf)) {
-                                    $scope.showPromptButton = false;
-                                    $scope.promptModalMissingReqFields = false;
+                                    $scope.jobNodeState.showPromptButton = false;
+                                    $scope.jobNodeState.promptModalMissingReqFields = false;
                                     $scope.nodeFormDataLoaded = true;
                             } else {
                                 $scope.showPromptButton = true;
@@ -632,7 +632,32 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                             finishConfiguringEdit();
                         }
                     } else {
-                        finishConfiguringAdd();
+                        $scope.activeTab = "templates";
+                        const alwaysOption = {
+                            label: $scope.strings.get('workflow_maker.ALWAYS'),
+                            value: 'always'
+                        };
+                        const successOption = {
+                            label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
+                            value: 'success'
+                        };
+                        const failureOption = {
+                            label: $scope.strings.get('workflow_maker.ON_FAILURE'),
+                            value: 'failure'
+                        };
+                        $scope.edgeTypeOptions = [alwaysOption];
+                        switch($scope.nodeConfig.newNodeIsRoot) {
+                            case true:
+                                $scope.edgeType = alwaysOption;
+                                break;
+                            case false:
+                                $scope.edgeType = successOption;
+                                $scope.edgeTypeOptions.push(successOption, failureOption);
+                                break;
+                        }
+                        select2ifyDropdowns();
+
+                        $scope.nodeFormDataLoaded = true;
                     }
                 });
         };
@@ -681,7 +706,22 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             $scope.promptData.triggerModalOpen = true;
         };
 
-        $scope.toggle_row = (selectedRow) => {
+        $scope.selectIsDisabled = () => {
+            if($scope.activeTab === "templates") {
+                return !($scope.jobNodeState.selectedTemplate) ||
+                    $scope.jobNodeState.promptModalMissingReqFields ||
+                    $scope.jobNodeState.credentialRequiresPassword ||
+                    $scope.jobNodeState.selectedTemplateInvalid;
+            } else if($scope.activeTab === "project_syncs") {
+                return !$scope.projectNodeState.selectedTemplate;
+            } else if($scope.activeTab === "inventory_syncs") {
+                return !$scope.inventoryNodeState.selectedTemplate;
+            } else if ($scope.activeTab === "approval") {
+                return !($scope.approvalNodeState.name && $scope.approvalNodeState.name !== "") || $scope.workflow_approval.pauseTimeout.$error.min;
+            }
+        };
+
+        $scope.selectTemplate = (selectedTemplate) => {
             if (!$scope.readOnly) {
                 templateManuallySelected(selectedRow);
             }

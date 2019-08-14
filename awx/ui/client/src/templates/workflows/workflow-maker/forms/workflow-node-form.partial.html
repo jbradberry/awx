@@ -103,11 +103,50 @@
             </div>
             <paginate base-path="inventory_sources" collection="wf_maker_inventory_sources" dataset="wf_maker_inventory_source_dataset" iterator="wf_maker_inventory_source" query-set="wf_maker_inventory_source_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
         </div>
+        <form id="workflow_approval" name="workflow_approval" ng-show="activeTab === 'approval'">
+            <div class="form-group Form-formGroup Form-formGroup--singleColumn">
+                <label for="pauseName" class="Form-inputLabelContainer">
+                        <span class="Form-requiredAsterisk">*</span>
+                        <span class="Form-inputLabel" translate>Name</span>
+                    </label>
+                    <div>
+                        <input type="text" ng-model="approvalNodeState.name" name="pauseName" id="workflow_job_template_pauseName" class="form-control Form-textInput" />
+                    </div>
+                </label>
+            </div>
+            <div class="form-group Form-formGroup Form-formGroup--singleColumn">
+                <label for="pauseDesc" class="Form-inputLabelContainer">
+                        <span class="Form-inputLabel" translate>Description</span>
+                    </label>
+                    <div>
+                        <input type="text" ng-model="approvalNodeState.description" name="pauseDesc" id="workflow_job_template_pauseDesc" class="form-control Form-textInput" />
+                    </div>
+                </label>
+            </div>
+            <div class="form-group Form-formGroup Form-formGroup--singleColumn">
+                <label for="pauseTimeout" class="Form-inputLabelContainer">
+                    <span class="Form-inputLabel" translate>Timeout</span>
+                    <a id="workflow-maker-timeout-popover" href="" aw-pop-over="{{:: strings.get('workflow_maker.TIMEOUT_POPOVER') }}" data-placement="top" data-container="body" over-title="{{:: strings.get('workflow_maker.TIMEOUT') }}" class="help-link">
+                        <i class="fa fa-question-circle"></i>
+                    </a>
+                </label>
+                <div>
+                    <input type="number" value="0" min=0 aw-min="0" ng-model="approvalNodeState.timeout" name="pauseTimeout" id="workflow_job_template_pauseTimeout" aw-spinner="pauseTimeout" integer />
+                    <div class="error" id="workflow_job_template_pauseTimeout-minmax-error" ng-show="workflow_approval.pauseTimeout.$error.min" translate>Please enter a number greater than or equal to 0.</div>
+                </div>
+            </div>
+        </form>
     </div>
-    <div ng-if="selectedTemplate && selectedTemplateInvalid">
+    <div ng-if="selectedTemplate && jobNodeState.selectedTemplateInvalid">
         <div class="WorkflowMaker-invalidJobTemplateWarning">
             <span class="fa fa-warning"></span>
             <span>{{:: strings.get('workflows.INVALID_JOB_TEMPLATE') }}</span>
+        </div>
+    </div>
+    <div ng-if="selectedTemplate && credentialRequiresPassword">
+        <div class="WorkflowMaker-invalidJobTemplateWarning">
+            <span class="fa fa-warning"></span>
+            <span>{{:: strings.get('workflows.CREDENTIAL_WITH_PASS') }}</span>
         </div>
     </div>
     <div ng-if="selectedTemplate && credentialRequiresPassword">
@@ -213,12 +252,30 @@
                     </div>
                 </div>
             </div>
+            <div ng-show="showSkipTags" class="Prompt-previewTagContainer">
+                <div class="u-wordwrap" ng-repeat="tag in skipTags">
+                    <div class="LabelList-tag">
+                        <span>{{tag}}</span>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.diff_mode !== null">
             <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.SHOW_CHANGES') }}</div>
             <div class="Prompt-previewRowValue">
-                <span ng-if="promptData.prompts.diffMode.value">{{:: strings.get('ON') }}</span>
-                <span ng-if="!promptData.prompts.diffMode.value">{{:: strings.get('OFF') }}</span>
+                <span ng-if="jobNodeState.promptData.prompts.diffMode.value">{{:: strings.get('ON') }}</span>
+                <span ng-if="!jobNodeState.promptData.prompts.diffMode.value">{{:: strings.get('OFF') }}</span>
+            </div>
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.scm_branch !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.SCM_BRANCH') }}</div>
+            <div class="Prompt-previewRowValue" ng-bind="nodeConfig.node.originalNodeObject.scm_branch"></div>
+        </div>
+        <div class="Prompt-previewRow--noflex" ng-show="showExtraVars">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.EXTRA_VARIABLES') }}</div>
+            <div>
+                <textarea rows="6" ng-model="extraVars" name="node_form_extra_vars" class="form-control Form-textArea Form-textAreaLabel" id="workflow_node_form_extra_vars"></textarea>
+            </div>
             </div>
         </div>
         <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.scm_branch !== null">
