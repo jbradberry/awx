@@ -358,7 +358,7 @@ def gather_analytics():
 
 @task()
 def run_administrative_checks():
-    logger.warn("Running administrative checks.")
+    logger.warning("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:
         return
     validation_info = get_licenser().validate()
@@ -535,7 +535,7 @@ def awx_periodic_scheduler():
             template = schedule.unified_job_template
             schedule.update_computed_fields() # To update next_run timestamp.
             if template.cache_timeout_blocked:
-                logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
+                logger.warning("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
                 continue
             try:
                 job_kwargs = schedule.get_job_kwargs()
@@ -587,7 +587,7 @@ def handle_work_error(task_id, *args, **kwargs):
                 instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
                 if not instance:
                     # Unknown task type
-                    logger.warn("Unknown task type: {}".format(each_task['type']))
+                    logger.warning("Unknown task type: {}".format(each_task['type']))
                     continue
             except ObjectDoesNotExist:
                 logger.warning('Missing {} `{}` in error callback.'.format(each_task['type'], each_task['id']))
@@ -1164,7 +1164,7 @@ class BaseTask(object):
         if self.instance.cancel_flag or self.instance.status == 'canceled':
             cancel_wait = (now() - self.instance.modified).seconds if self.instance.modified else 0
             if cancel_wait > 5:
-                logger.warn('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
+                logger.warning('Request to cancel {} took {} seconds to complete.'.format(self.instance.log_format, cancel_wait))
             return True
         return False
 
@@ -1437,8 +1437,8 @@ class BaseTask(object):
                         # our current instance group precendence logic, since it
                         # will just sit here forever if kubernetes returns this
                         # error.
-                        logger.warn(exc.body)
-                        logger.warn(f"Could not launch pod for {log_name}. Exceeded quota.")
+                        logger.warning(exc.body)
+                        logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
                         self.update_model(task.pk, status='pending')
                         return
                 except Exception:

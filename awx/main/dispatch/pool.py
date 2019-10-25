@@ -225,7 +225,7 @@ class WorkerPool(object):
         except Exception:
             logger.exception('could not fork')
         else:
-            logger.warn('scaling up worker pid:{}'.format(worker.pid))
+            logger.warning('scaling up worker pid:{}'.format(worker.pid))
         return idx, worker
 
     def debug(self, *args, **kwargs):
@@ -266,10 +266,10 @@ class WorkerPool(object):
                 pass
             except Exception:
                 tb = traceback.format_exc()
-                logger.warn("could not write to queue %s" % preferred_queue)
-                logger.warn("detail: {}".format(tb))
+                logger.warning("could not write to queue %s" % preferred_queue)
+                logger.warning("detail: {}".format(tb))
             write_attempt_order.append(preferred_queue)
-        logger.warn("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
+        logger.warning("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
         return None
 
     def stop(self, signum):
@@ -357,7 +357,7 @@ class AutoscalePool(WorkerPool):
                 # more processes in the pool than we need (> min)
                 # send this process a message so it will exit gracefully
                 # at the next opportunity
-                logger.warn('scaling down worker pid:{}'.format(w.pid))
+                logger.warning('scaling down worker pid:{}'.format(w.pid))
                 w.quit()
                 self.workers.remove(w)
 

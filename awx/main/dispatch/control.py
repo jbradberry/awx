@@ -37,7 +37,7 @@ class Control(object):
         return self.control_with_reply('running', *args, **kwargs)
 
     def control_with_reply(self, command, timeout=5):
-        logger.warn('checking {} {} for {}'.format(self.service, command, self.queuename))
+        logger.warning('checking {} {} for {}'.format(self.service, command, self.queuename))
         reply_queue = Queue(name="amq.rabbitmq.reply-to")
         self.result = None
         with Connection(settings.BROKER_URL) as conn:

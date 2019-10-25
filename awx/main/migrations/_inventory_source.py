@@ -95,7 +95,7 @@ def _get_instance_id_for_upgrade(host, new_id):
         return None
     if len(new_id) > 255:
         # this should never happen
-        logger.warn('Computed instance id "{}"" for host {}-{} is too long'.format(
+        logger.warning('Computed instance id "{}"" for host {}-{} is too long'.format(
             new_id_value, host.name, host.pk
         ))
         return None
@@ -109,7 +109,7 @@ def set_new_instance_id(apps, source, new_id):
     id_from_settings = getattr(settings, '{}_INSTANCE_ID_VAR'.format(source.upper()))
     if id_from_settings != new_id:
         # User applied an instance ID themselves, so nope on out of there
-        logger.warn('You have an instance ID set for {}, not migrating'.format(source))
+        logger.warning('You have an instance ID set for {}, not migrating'.format(source))
         return
     logger.debug('Migrating inventory instance_id for {} to {}'.format(source, new_id))
     Host = apps.get_model('main', 'Host')

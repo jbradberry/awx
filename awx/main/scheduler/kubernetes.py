@@ -42,7 +42,7 @@ class PodManager(object):
             logger.debug(f"Pod {self.pod_name} is online.")
             return pod
         else:
-            logger.warn(f"Pod {self.pod_name} did not start. Status is {pod.status.phase}.")
+            logger.warning(f"Pod {self.pod_name} did not start. Status is {pod.status.phase}.")
 
     @classmethod
     def list_active_jobs(self, instance_group):

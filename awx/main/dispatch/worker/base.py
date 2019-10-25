@@ -61,7 +61,7 @@ class AWXConsumer(ConsumerMixin):
         ])
 
     def control(self, body, message):
-        logger.warn(body)
+        logger.warning(body)
         control = body.get('control')
         if control in ('status', 'running'):
             producer = Producer(
@@ -112,7 +112,7 @@ class AWXConsumer(ConsumerMixin):
 
     def stop(self, signum, frame):
         self.should_stop = True  # this makes the kombu mixin stop consuming
-        logger.warn('received {}, stopping'.format(signame(signum)))
+        logger.warning('received {}, stopping'.format(signame(signum)))
         self.worker.on_stop()
         raise SystemExit()
 
@@ -147,7 +147,7 @@ class BaseWorker(object):
                     uuid = body['uuid']
                     logger.debug('task {} is finished'.format(uuid))
                     finished.put(uuid)
-        logger.warn('worker exiting gracefully pid:{}'.format(os.getpid()))
+        logger.warning('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def perform_work(self, body):
         raise NotImplementedError()

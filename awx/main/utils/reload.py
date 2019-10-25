@@ -40,5 +40,5 @@ def _supervisor_service_command(command, communicate=True):
 
 
 def stop_local_services(communicate=True):
-    logger.warn('Stopping services on this node in response to user action')
+    logger.warning('Stopping services on this node in response to user action')
     _supervisor_service_command(command='stop', communicate=communicate)
