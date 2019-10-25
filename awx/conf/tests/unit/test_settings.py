@@ -176,9 +176,9 @@ def test_default_setting(settings, mocker):
     )
 
     settings_to_cache = mocker.Mock(**{'order_by.return_value': []})
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=settings_to_cache):
-        assert settings.AWX_SOME_SETTING == 'DEFAULT'
-        assert settings.cache.get('AWX_SOME_SETTING') == 'DEFAULT'
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=settings_to_cache)
+    assert settings.AWX_SOME_SETTING == 'DEFAULT'
+    assert settings.cache.get('AWX_SOME_SETTING') == 'DEFAULT'
 
 
 @pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
@@ -203,9 +203,9 @@ def test_setting_is_not_from_setting_file(settings, mocker):
     )
 
     settings_to_cache = mocker.Mock(**{'order_by.return_value': []})
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=settings_to_cache):
-        assert settings.AWX_SOME_SETTING == 'DEFAULT'
-        assert settings.registry.get_setting_field('AWX_SOME_SETTING').defined_in_file is False
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=settings_to_cache)
+    assert settings.AWX_SOME_SETTING == 'DEFAULT'
+    assert settings.registry.get_setting_field('AWX_SOME_SETTING').defined_in_file is False
 
 
 def test_empty_setting(settings, mocker):
@@ -223,10 +223,10 @@ def test_empty_setting(settings, mocker):
             'first.return_value': None
         }),
     })
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
-        with pytest.raises(AttributeError):
-            settings.AWX_SOME_SETTING
-        assert settings.cache.get('AWX_SOME_SETTING') == SETTING_CACHE_NOTSET
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks)
+    with pytest.raises(AttributeError):
+        settings.AWX_SOME_SETTING
+    assert settings.cache.get('AWX_SOME_SETTING') == SETTING_CACHE_NOTSET
 
 
 def test_setting_from_db(settings, mocker):
@@ -246,9 +246,9 @@ def test_setting_from_db(settings, mocker):
             'first.return_value': setting_from_db
         }),
     })
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
-        assert settings.AWX_SOME_SETTING == 'FROM_DB'
-        assert settings.cache.get('AWX_SOME_SETTING') == 'FROM_DB'
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks)
+    assert settings.AWX_SOME_SETTING == 'FROM_DB'
+    assert settings.cache.get('AWX_SOME_SETTING') == 'FROM_DB'
 
 
 @pytest.mark.parametrize('encrypted', (True, False))
@@ -271,9 +271,9 @@ def test_setting_from_db_with_unicode(settings, mocker, encrypted):
             'first.return_value': setting_from_db
         }),
     })
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
-        assert settings.AWX_SOME_SETTING == 'Iñtërnâtiônàlizætiøn'
-        assert settings.cache.get('AWX_SOME_SETTING') == 'Iñtërnâtiônàlizætiøn'
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks)
+    assert settings.AWX_SOME_SETTING == 'Iñtërnâtiônàlizætiøn'
+    assert settings.cache.get('AWX_SOME_SETTING') == 'Iñtërnâtiônàlizætiøn'
 
 
 @pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
@@ -328,8 +328,8 @@ def test_db_setting_update(settings, mocker):
     setting_list = mocker.Mock(**{
         'order_by.return_value.first.return_value': existing_setting
     })
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=setting_list):
-        settings.AWX_SOME_SETTING = 'NEW-VALUE'
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=setting_list)
+    settings.AWX_SOME_SETTING = 'NEW-VALUE'
 
     assert existing_setting.value == 'NEW-VALUE'
     existing_setting.save.assert_called_with(update_fields=['value'])
@@ -345,8 +345,8 @@ def test_db_setting_deletion(settings, mocker):
     )
 
     existing_setting = mocker.Mock(key='AWX_SOME_SETTING', value='FROM_DB')
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=[existing_setting]):
-        del settings.AWX_SOME_SETTING
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=[existing_setting])
+    del settings.AWX_SOME_SETTING
 
     assert existing_setting.delete.call_count == 1
 
@@ -452,10 +452,10 @@ def test_sensitive_cache_data_is_encrypted(settings, mocker):
             'first.return_value': setting_from_db
         }),
     })
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
-        cache.set('AWX_ENCRYPTED', 'SECRET!')
-        assert cache.get('AWX_ENCRYPTED') == 'SECRET!'
-        assert native_cache.get('AWX_ENCRYPTED') == 'FRPERG!'
+    mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks)
+    cache.set('AWX_ENCRYPTED', 'SECRET!')
+    assert cache.get('AWX_ENCRYPTED') == 'SECRET!'
+    assert native_cache.get('AWX_ENCRYPTED') == 'FRPERG!'
 
 
 def test_readonly_sensitive_cache_data_is_encrypted(settings):

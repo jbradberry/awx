@@ -93,10 +93,10 @@ def test_send_notifications_not_list():
 
 
 def test_send_notifications_job_id(mocker):
-    with mocker.patch('awx.main.models.UnifiedJob.objects.get'):
-        tasks.send_notifications([], job_id=1)
-        assert UnifiedJob.objects.get.called
-        assert UnifiedJob.objects.get.called_with(id=1)
+    mocker.patch('awx.main.models.UnifiedJob.objects.get')
+    tasks.send_notifications([], job_id=1)
+    assert UnifiedJob.objects.get.called
+    assert UnifiedJob.objects.get.called_with(id=1)
 
 
 def test_work_success_callback_missing_job():
@@ -1885,9 +1885,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         # force test to use the ec2 script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7'))
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -1961,9 +1961,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         }
 
         # force azure_rm inventory to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7'))
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -2011,9 +2011,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         }
 
         # force azure_rm inventory to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7'))
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         safe_env = build_safe_env(env)
 
@@ -2220,8 +2220,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
         # force tower inventory source to use script injection logic, as opposed to plugin
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            env = task.build_env(inventory_update, private_data_dir, False)
+        mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7'))
+        env = task.build_env(inventory_update, private_data_dir, False)
 
         safe_env = build_safe_env(env)
 
@@ -2283,9 +2283,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
 
-        with mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7')):
-            private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
-            env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
+        mocker.patch('awx.main.tasks._get_ansible_version', mocker.MagicMock(return_value='2.7'))
+        private_data_files = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, False, private_data_files)
 
         assert env['FOO'] == 'BAR'
 

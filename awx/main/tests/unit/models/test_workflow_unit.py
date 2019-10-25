@@ -168,29 +168,29 @@ def test_node_getter_and_setters():
 class TestWorkflowJobCreate:
     def test_create_no_prompts(self, wfjt_node_no_prompts, workflow_job_unit, mocker):
         mock_create = mocker.MagicMock()
-        with mocker.patch('awx.main.models.WorkflowJobNode.objects.create', mock_create):
-            wfjt_node_no_prompts.create_workflow_job_node(workflow_job=workflow_job_unit)
-            mock_create.assert_called_once_with(
-                extra_data={},
-                survey_passwords={},
-                char_prompts=wfjt_node_no_prompts.char_prompts,
-                inventory=None,
-                unified_job_template=wfjt_node_no_prompts.unified_job_template,
-                workflow_job=workflow_job_unit)
+        mocker.patch('awx.main.models.WorkflowJobNode.objects.create', mock_create)
+        wfjt_node_no_prompts.create_workflow_job_node(workflow_job=workflow_job_unit)
+        mock_create.assert_called_once_with(
+            extra_data={},
+            survey_passwords={},
+            char_prompts=wfjt_node_no_prompts.char_prompts,
+            inventory=None,
+            unified_job_template=wfjt_node_no_prompts.unified_job_template,
+            workflow_job=workflow_job_unit)
 
     def test_create_with_prompts(self, wfjt_node_with_prompts, workflow_job_unit, credential, mocker):
         mock_create = mocker.MagicMock()
-        with mocker.patch('awx.main.models.WorkflowJobNode.objects.create', mock_create):
-            wfjt_node_with_prompts.create_workflow_job_node(
-                workflow_job=workflow_job_unit
-            )
-            mock_create.assert_called_once_with(
-                extra_data={},
-                survey_passwords={},
-                char_prompts=wfjt_node_with_prompts.char_prompts,
-                inventory=wfjt_node_with_prompts.inventory,
-                unified_job_template=wfjt_node_with_prompts.unified_job_template,
-                workflow_job=workflow_job_unit)
+        mocker.patch('awx.main.models.WorkflowJobNode.objects.create', mock_create)
+        wfjt_node_with_prompts.create_workflow_job_node(
+            workflow_job=workflow_job_unit
+        )
+        mock_create.assert_called_once_with(
+            extra_data={},
+            survey_passwords={},
+            char_prompts=wfjt_node_with_prompts.char_prompts,
+            inventory=wfjt_node_with_prompts.inventory,
+            unified_job_template=wfjt_node_with_prompts.unified_job_template,
+            workflow_job=workflow_job_unit)
 
 
 @mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])

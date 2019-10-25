@@ -17,9 +17,9 @@ def test_single_job_scheduler_launch(default_instance_group, job_template_factor
     j = objects.jobs["job_should_start"]
     j.status = 'pending'
     j.save()
-    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
-        TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, default_instance_group, [], instance)
+    mocker.patch("awx.main.scheduler.TaskManager.start_task")
+    TaskManager().schedule()
+    TaskManager.start_task.assert_called_once_with(j, default_instance_group, [], instance)
 
 
 @pytest.mark.django_db
@@ -128,9 +128,9 @@ def test_single_jt_multi_job_launch_blocks_last(default_instance_group, job_temp
         TaskManager.start_task.assert_called_once_with(j1, default_instance_group, [], instance)
         j1.status = "successful"
         j1.save()
-    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
-        TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j2, default_instance_group, [], instance)
+    mocker.patch("awx.main.scheduler.TaskManager.start_task")
+    TaskManager().schedule()
+    TaskManager.start_task.assert_called_once_with(j2, default_instance_group, [], instance)
 
 
 @pytest.mark.django_db

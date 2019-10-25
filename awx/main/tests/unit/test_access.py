@@ -186,10 +186,10 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     access = JobTemplateAccess(user_unit)
 
     mock_add = mock.MagicMock(return_value=False)
-    with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
-        with mocker.patch('awx.main.access.JobTemplateAccess.can_add', mock_add):
-            with mocker.patch('awx.main.access.JobTemplateAccess.can_read', return_value=True):
-                assert not access.can_change(job_template_with_ids, data)
+    mocker.patch('awx.main.models.rbac.Role.__contains__', return_value=True)
+    mocker.patch('awx.main.access.JobTemplateAccess.can_add', mock_add)
+    mocker.patch('awx.main.access.JobTemplateAccess.can_read', return_value=True)
+    assert not access.can_change(job_template_with_ids, data)
 
     mock_add.assert_called_once_with({
         'inventory': data['inventory'],

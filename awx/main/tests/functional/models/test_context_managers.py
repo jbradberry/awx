@@ -34,14 +34,13 @@ class TestComputedFields:
 
     def test_computed_fields_normal_use(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)
-        with mocker.patch.object(update_inventory_computed_fields, 'delay'):
-            job.delete()
-            update_inventory_computed_fields.delay.assert_called_once_with(inventory.id, True)
+        mocker.patch.object(update_inventory_computed_fields, 'delay')
+        job.delete()
+        update_inventory_computed_fields.delay.assert_called_once_with(inventory.id, True)
 
     def test_disable_computed_fields(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)
         with disable_computed_fields():
-            with mocker.patch.object(update_inventory_computed_fields, 'delay'):
-                job.delete()
-                update_inventory_computed_fields.delay.assert_not_called()
-
+            mocker.patch.object(update_inventory_computed_fields, 'delay')
+            job.delete()
+            update_inventory_computed_fields.delay.assert_not_called()
