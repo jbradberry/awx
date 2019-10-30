@@ -46,7 +46,7 @@ def settings(request):
     # as "defined in a settings file".  This is analogous to manually
     # specifying a setting on the filesystem (e.g., in a local_settings.py in
     # development, or in /etc/tower/conf.d/<something>.py)
-    in_file_marker = request.node.get_marker('defined_in_file')
+    in_file_marker = request.node.get_closest_marker('defined_in_file')
     defaults = in_file_marker.kwargs if in_file_marker else {}
     defaults['DEFAULTS_SNAPSHOT'] = {}
     settings.configure(**defaults)

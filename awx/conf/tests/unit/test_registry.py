@@ -29,7 +29,7 @@ def reg(request):
     # as "defined in a settings file".  This is analogous to manually
     # specifying a setting on the filesystem (e.g., in a local_settings.py in
     # development, or in /etc/tower/conf.d/<something>.py)
-    defaults = request.node.get_marker('defined_in_file')
+    defaults = request.node.get_closest_marker('defined_in_file')
     if defaults:
         settings.configure(**defaults.kwargs)
     settings._wrapped = SettingsWrapper(settings._wrapped,
