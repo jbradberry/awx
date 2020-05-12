@@ -53,40 +53,28 @@ class WorkflowDAG(SimpleDAG):
         for edge in always_nodes:
             self.add_edge(wfn_by_id[edge[0]], wfn_by_id[edge[1]], 'always_nodes')
 
-    def _are_relevant_parents_finished(self, node):
+    def _are_relevant_parents_good(self, node):
         obj = node['node_object']
         parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
-        for p in parent_nodes:
-            if p.do_not_run is True:
-                continue
-            elif p.unified_job_template is None:
-                continue
-            # do_not_run is False, node might still run a job and thus blocks children
-            elif not p.job:
-                return False
-            # Node decidedly got a job; check if job is done
-            elif p.job and p.job.status not in ['successful', 'failed', 'error', 'canceled']:
-                return False
-        return True
+        success_nodes = [p['node_object'] for p in self.get_parents(obj, 'success_nodes')]
+        failure_nodes = [p['node_object'] for p in self.get_parents(obj, 'failure_nodes')]
+        always_nodes = [p['node_object'] for p in self.get_parents(obj, 'always_nodes')]
 
-    def _all_parents_met_convergence_criteria(self, node):
-        # This function takes any node and checks that all it's parents have met their criteria to run the child.
-        # This returns a boolean and is really only useful if the node is an ALL convergence node and is
-        # intended to be used in conjuction with the node property `all_parents_must_converge`
-        obj = node['node_object']
-        parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
-        for p in parent_nodes:
-            #node has a status
-            if p.job and p.job.status in ["successful", "failed"]:
-                if p.job and p.job.status == "successful":
-                    status = "success_nodes"
-                elif p.job and p.job.status == "failed":
-                    status = "failure_nodes"
-                #check that the nodes status matches either a pathway of the same status or is an always path.
-                if (p not in [node['node_object'] for node in self.get_parents(obj, status)] and
-                        p not in [node['node_object'] for node in self.get_parents(obj, "always_nodes")]):
-                    return False
-        return True
+        relevant_parents = (
+            (
+                p.job is not None and p.job.status in ['successful', 'failed', 'error', 'canceled']
+                and (
+                    p in always_nodes
+                    or (p in success_nodes and p.job.status == 'successful')
+                    or (p in failure_nodes and p.job.status == 'failed')
+                )
+            )
+            for p in parent_nodes
+            if not p.do_not_run and p.unified_job_template is not None
+        )
+        fn = all if obj.all_parents_must_converge else any
+
+        return fn(relevant_parents)
 
     def bfs_nodes_to_run(self):
         nodes = self.get_root_nodes()
@@ -110,13 +98,8 @@ class WorkflowDAG(SimpleDAG):
                 nodes.extend(self.get_children(obj, 'failure_nodes') +
                              self.get_children(obj, 'always_nodes'))
             else:
-                # This catches root nodes or ANY convergence nodes
-                if not obj.all_parents_must_converge and self._are_relevant_parents_finished(n):
+                if self._are_relevant_parents_good(n):
                     nodes_found.append(n)
-                # This catches ALL convergence nodes
-                elif obj.all_parents_must_converge and self._are_relevant_parents_finished(n):
-                    if self._all_parents_met_convergence_criteria(n):
-                        nodes_found.append(n)
 
         return [n['node_object'] for n in nodes_found]
 
@@ -247,7 +230,7 @@ class WorkflowDAG(SimpleDAG):
             parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
             if not obj.do_not_run and not obj.job and node not in root_nodes:
                 if obj.all_parents_must_converge:
-                    if any(p.do_not_run for p in parent_nodes) or not self._all_parents_met_convergence_criteria(node):
+                    if any(p.do_not_run for p in parent_nodes) or not self._are_relevant_parents_good(node):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(node)
                 else:
