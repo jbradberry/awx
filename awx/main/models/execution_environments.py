@@ -2,16 +2,15 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from awx.api.versioning import reverse
-from awx.main.models.base import PrimordialModel
+from awx.main.models.base import CommonModel
 
 
 __all__ = ['ExecutionEnvironment']
 
 
-class ExecutionEnvironment(PrimordialModel):
+class ExecutionEnvironment(CommonModel):
     class Meta:
-        unique_together = ('organization', 'image')
-        ordering = (models.F('organization_id').asc(nulls_first=True), 'image')
+        ordering = ('-created',)
 
     organization = models.ForeignKey(
         'Organization',
@@ -27,6 +26,7 @@ class ExecutionEnvironment(PrimordialModel):
         verbose_name=_('image location'),
         help_text=_("The registry location where the container is stored."),
     )
+    pull = models.BooleanField(default=True)
     managed_by_tower = models.BooleanField(default=False, editable=False)
     credential = models.ForeignKey(
         'Credential',
